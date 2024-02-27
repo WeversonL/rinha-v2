@@ -25,7 +25,8 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v4.1.1
         with:
-          context: ./docker
+          context: .
+          dockerfile: docker/Dockerfile
           push: true
           tags: |
             weversonlemos/rinha-v2:v1
