@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import br.com.widsl.rinhav2.exception.handler.GlobalExceptionHandler;
-import br.com.widsl.rinhav2.exception.impl.ClienteNaoEncontrado;
-import br.com.widsl.rinhav2.exception.impl.EntidadeNaoProcessada;
 
 @ExtendWith(SpringExtension.class)
 class GlobalExceptionHandlerTest {
@@ -19,15 +17,13 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleClienteNaoEncontrado_DeveRetornarStatusNotFound() {
-        ClienteNaoEncontrado exception = new ClienteNaoEncontrado("Cliente não encontrado");
-        ResponseEntity<String> response = handler.handleClienteNaoEncontrado(exception);
+        ResponseEntity<String> response = handler.handleClienteNaoEncontrado();
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     void handleErrosValidacao_DeveRetornarStatusUnprocessableEntity() {
-        EntidadeNaoProcessada exception = new EntidadeNaoProcessada("Erro de validação");
-        ResponseEntity<String> response = handler.handleErrosValidacao(exception);
+        ResponseEntity<String> response = handler.handleErrosValidacao();
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
     }
 

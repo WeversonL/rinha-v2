@@ -1,5 +1,11 @@
 package br.com.widsl.rinhav2.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import br.com.widsl.rinhav2.domain.Extrato;
 import br.com.widsl.rinhav2.domain.TransacaoRequest;
 import br.com.widsl.rinhav2.domain.TransacaoResponse;
@@ -10,13 +16,8 @@ import br.com.widsl.rinhav2.model.TransacaoModel;
 import br.com.widsl.rinhav2.repository.ClienteRepository;
 import br.com.widsl.rinhav2.repository.TransacaoRepository;
 import br.com.widsl.rinhav2.service.CrebitService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Service
 public class CrebitServiceImpl implements CrebitService {
@@ -37,15 +38,14 @@ public class CrebitServiceImpl implements CrebitService {
 
         return buscaClientePorId(id)
                 .flatMap(cliente -> persisteSaldoCliente(id, valor)
-                        .flatMap(clienteAtualizado -> persisteTransacao(id, request, clienteAtualizado))
-                );
+                        .flatMap(clienteAtualizado -> persisteTransacao(id, request, clienteAtualizado)));
     }
 
     private Mono<TransacaoResponse> persisteTransacao(Integer id, TransacaoRequest request, ClienteModel cliente) {
         return transacaoRepository.save(
                 new TransacaoModel(id, request.valor(), null, request.descricao(),
-                        request.tipo())
-        ).thenReturn(new TransacaoResponse(cliente.limite(), cliente.saldo()));
+                        request.tipo()))
+                .thenReturn(new TransacaoResponse(cliente.limite(), cliente.saldo()));
     }
 
     private Mono<ClienteModel> persisteSaldoCliente(Integer id, Integer valor) {

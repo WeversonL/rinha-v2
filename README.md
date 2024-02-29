@@ -28,13 +28,13 @@ environment with 1.5vCPUs and 550MB of memory.
 
 ## Get started
 
-In the project, an [example environment variables file](.env) will be available. The project will start using it, if you
+In the project, an [example environment variables file](/docker/.env) will be available. The project will start using it, if you
 want to change the database user and password, or some other value, feel free
 
 0. Clone git repository with modules
 
-   git clone https://github.com/WeversonL/rinha-v2.git
-   cd rinha-v2
+        git clone https://github.com/WeversonL/rinha-v2.git
+        cd rinha-v2
 
 ### Running the application with docker-compose
 

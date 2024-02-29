@@ -17,14 +17,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ClienteNaoEncontrado.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handleClienteNaoEncontrado(ClienteNaoEncontrado ex) {
+    public ResponseEntity<String> handleClienteNaoEncontrado() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @ExceptionHandler({ DecodingException.class, EntidadeNaoProcessada.class, MethodArgumentNotValidException.class,
             WebExchangeBindException.class })
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ResponseEntity<String> handleErrosValidacao(Exception ex) {
+    public ResponseEntity<String> handleErrosValidacao() {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
     }
 
