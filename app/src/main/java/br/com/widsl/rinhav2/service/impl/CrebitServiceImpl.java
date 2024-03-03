@@ -42,6 +42,13 @@ public class CrebitServiceImpl implements CrebitService {
                 .switchIfEmpty(Mono.error(new ClienteNaoEncontrado("Cliente não encontrado")));
     }
 
+    private Mono<ClienteModel> buscaCliente(final Integer id) {
+
+        return this.clienteRepository.buscaClientePorId(id)
+                .switchIfEmpty(Mono.error(new ClienteNaoEncontrado("Cliente não encontrado")));
+
+    }
+
     private Mono<TransacaoResponse> persisteTransacao(final Integer id, final TransacaoRequest request,
             final ClienteModel cliente) {
         return this.transacaoRepository.save(
@@ -73,11 +80,10 @@ public class CrebitServiceImpl implements CrebitService {
         return clienteResult.zipWith(transacaoFlux.collectList(), Extrato::new);
     }
 
-    private Mono<ClienteModel> buscaCliente(final Integer id) {
-
-        return this.clienteRepository.buscaClientePorId(id)
-                .switchIfEmpty(Mono.error(new ClienteNaoEncontrado("Cliente não encontrado")));
-
+    @Override
+    public Flux<Void> removerTransacao(Integer id) {
+        return this.transacaoRepository.buscaTransacao(id)
+                .flatMap(t -> this.transacaoRepository.deletaTransacaoPorId(t.clienteId()));
     }
 
 }

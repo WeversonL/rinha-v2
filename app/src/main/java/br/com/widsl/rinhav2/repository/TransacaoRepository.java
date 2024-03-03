@@ -13,4 +13,7 @@ public interface TransacaoRepository extends R2dbcRepository<TransacaoModel, Int
             "FROM transacoes WHERE cliente_id = :id ORDER BY realizada_em DESC LIMIT 10")
     Flux<TransacaoModel> buscaTransacao(Integer id);
 
+    @Query("DELETE FROM transacoes WHERE cliente_id = :id")
+    Flux<Void> deletaTransacaoPorId(Integer id);
+
 }
