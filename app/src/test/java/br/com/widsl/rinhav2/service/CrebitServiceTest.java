@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.util.Objects;
 
-import br.com.widsl.rinhav2.domain.TransacaoRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import br.com.widsl.rinhav2.domain.TransacaoRequest;
 import br.com.widsl.rinhav2.exception.impl.ClienteNaoEncontrado;
 import br.com.widsl.rinhav2.exception.impl.EntidadeNaoProcessada;
 import br.com.widsl.rinhav2.model.ClienteModel;
@@ -47,6 +47,7 @@ class CrebitServiceTest {
     void setup() {
 
         ClienteModel cliente = criarClienteModel();
+        TransacaoModel transacao = criarTransacaoModel();
 
         BDDMockito.when(clienteRepository.buscaClientePorId(anyInt()))
                 .thenReturn(Mono.just(cliente));
@@ -58,10 +59,15 @@ class CrebitServiceTest {
                 .thenReturn(Mono.just(cliente));
 
         BDDMockito.when(transacaoRepository.save(any(TransacaoModel.class)))
-                .thenReturn(Mono.just(criarTransacaoModel()));
+                .thenReturn(Mono.just(transacao));
 
         BDDMockito.when(transacaoRepository.buscaTransacao(anyInt()))
-                .thenReturn(Flux.just(criarTransacaoModel()));
+                .thenReturn(Flux.just(transacao));
+
+        BDDMockito.when(transacaoRepository.buscaTransacao(anyInt()))
+                .thenReturn(Flux.just(transacao));
+        BDDMockito.when(transacaoRepository.deletaTransacaoPorId(anyInt()))
+                .thenReturn(Flux.empty());
 
     }
 
@@ -139,6 +145,14 @@ class CrebitServiceTest {
                         extrato -> Objects.equals(extrato.saldo().total(), criarExtrato().saldo().total()) &&
                                 Objects.equals(extrato.saldo().limite(), criarExtrato().saldo().limite()) &&
                                 extrato.ultimasTransacoes().isEmpty())
+                .verifyComplete();
+    }
+
+    @Test
+    void testaRemoverTransacaoComSucesso() {
+
+        StepVerifier.create(crebitService.removerTransacao(1))
+                .expectSubscription()
                 .verifyComplete();
     }
 

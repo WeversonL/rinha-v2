@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 public interface CrebitService {
     Mono<TransacaoResponse> gerarTransacao(final Integer id, final TransacaoRequest request);
+
     Flux<Void> removerTransacao(final Integer id);
 
     Mono<Extrato> gerarExtrato(final Integer id);

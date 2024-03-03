@@ -1,0 +1,13 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  r2dbc:
+    name: rinha-datasource
+    url: r2dbc:postgresql://localhost:5432/rinhadb
+    username: rinha
+    password: rinha
+
+  jackson:
+    deserialization:
+      accept-float-as-int: false

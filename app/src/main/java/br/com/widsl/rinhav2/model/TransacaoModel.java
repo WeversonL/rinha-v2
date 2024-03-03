@@ -7,5 +7,5 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Table("transacoes")
 public record TransacaoModel(@Column("cliente_id") Integer clienteId, Integer valor,
-                @Column("realizada_em") OffsetDateTime realizadaEm, String descricao, String tipo) {
+        @Column("realizada_em") OffsetDateTime realizadaEm, String descricao, String tipo) {
 }
