@@ -32,35 +32,38 @@ public class CrebitServiceImpl implements CrebitService {
 
     @Override
     @Transactional
-    public Mono<TransacaoResponse> gerarTransacao(Integer id, TransacaoRequest request) {
+    public Mono<TransacaoResponse> gerarTransacao(final Integer id, final TransacaoRequest request) {
 
         Integer valor = "d".equals(request.tipo()) ? (-request.valor()) : request.valor();
 
-        return buscaClientePorId(id)
-                .flatMap(cliente -> persisteSaldoCliente(id, valor)
-                        .flatMap(clienteAtualizado -> persisteTransacao(id, request, clienteAtualizado)));
+        return this.clienteRepository.buscaClientePorIdLockUpdate(id)
+                .flatMap(cliente -> this.persisteSaldoCliente(id, valor, cliente)
+                        .flatMap(clienteAtualizado -> this.persisteTransacao(id, request, clienteAtualizado)))
+                .switchIfEmpty(Mono.error(new ClienteNaoEncontrado("Cliente não encontrado")));
     }
 
-    private Mono<TransacaoResponse> persisteTransacao(Integer id, TransacaoRequest request, ClienteModel cliente) {
-        return transacaoRepository.save(
+    private Mono<TransacaoResponse> persisteTransacao(final Integer id, final TransacaoRequest request,
+            final ClienteModel cliente) {
+        return this.transacaoRepository.save(
                 new TransacaoModel(id, request.valor(), null, request.descricao(),
                         request.tipo()))
                 .thenReturn(new TransacaoResponse(cliente.limite(), cliente.saldo()));
     }
 
-    private Mono<ClienteModel> persisteSaldoCliente(Integer id, Integer valor) {
-        return clienteRepository.atualizaSaldoCliente(id, valor)
-                .switchIfEmpty(Mono.error(new EntidadeNaoProcessada("Entidade não processada")));
+    private Mono<ClienteModel> persisteSaldoCliente(final Integer id, final Integer valor, final ClienteModel cliente) {
+        if (cliente.saldo() + valor < -cliente.limite())
+            return Mono.error(new EntidadeNaoProcessada("Entidade não processada"));
+        return clienteRepository.atualizaSaldoCliente(id, (cliente.saldo() + valor));
     }
 
     @Override
     @Transactional
-    public Mono<Extrato> gerarExtrato(Integer id) {
+    public Mono<Extrato> gerarExtrato(final Integer id) {
 
-        Mono<Extrato.Saldo> clienteResult = this.buscaClientePorId(id)
+        Mono<Extrato.Saldo> clienteResult = this.buscaCliente(id)
                 .map(cliente -> new Extrato.Saldo(cliente.saldo(), cliente.limite(), LocalDateTime.now()));
 
-        Flux<Extrato.Transacao> transacaoFlux = transacaoRepository.buscaTransacao(id)
+        Flux<Extrato.Transacao> transacaoFlux = this.transacaoRepository.buscaTransacao(id)
                 .map(transacaos -> new Extrato.Transacao(
                         transacaos.valor(),
                         transacaos.tipo(),
@@ -70,9 +73,9 @@ public class CrebitServiceImpl implements CrebitService {
         return clienteResult.zipWith(transacaoFlux.collectList(), Extrato::new);
     }
 
-    private Mono<ClienteModel> buscaClientePorId(Integer id) {
+    private Mono<ClienteModel> buscaCliente(final Integer id) {
 
-        return clienteRepository.buscaClientePorId(id)
+        return this.clienteRepository.buscaClientePorId(id)
                 .switchIfEmpty(Mono.error(new ClienteNaoEncontrado("Cliente não encontrado")));
 
     }

@@ -6,7 +6,7 @@ import br.com.widsl.rinhav2.domain.TransacaoResponse;
 import reactor.core.publisher.Mono;
 
 public interface CrebitService {
-    Mono<TransacaoResponse> gerarTransacao(Integer id, TransacaoRequest request);
+    Mono<TransacaoResponse> gerarTransacao(final Integer id, final TransacaoRequest request);
 
-    Mono<Extrato> gerarExtrato(Integer id);
+    Mono<Extrato> gerarExtrato(final Integer id);
 }

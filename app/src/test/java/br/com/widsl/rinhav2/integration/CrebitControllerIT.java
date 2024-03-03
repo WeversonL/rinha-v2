@@ -55,6 +55,9 @@ class CrebitControllerIT {
         BDDMockito.when(clienteRepository.buscaClientePorId(anyInt()))
                 .thenReturn(Mono.just(cliente));
 
+        BDDMockito.when(clienteRepository.buscaClientePorIdLockUpdate(anyInt()))
+                .thenReturn(Mono.just(cliente));
+
         BDDMockito.when(clienteRepository.atualizaSaldoCliente(anyInt(), anyInt()))
                 .thenReturn(Mono.just(cliente));
 
@@ -83,7 +86,7 @@ class CrebitControllerIT {
     @SuppressWarnings("null")
     void testaRealizarTransacaoQuandoUsuarioNaoExisteIT() {
 
-        BDDMockito.when(clienteRepository.buscaClientePorId(anyInt()))
+        BDDMockito.when(clienteRepository.buscaClientePorIdLockUpdate(anyInt()))
                 .thenReturn(Mono.empty());
 
         webTestClient.post()
@@ -98,13 +101,16 @@ class CrebitControllerIT {
     @SuppressWarnings("null")
     void testaRealizarTransacaoComErroNoLimiteClienteIT() {
 
-        BDDMockito.when(clienteRepository.atualizaSaldoCliente(anyInt(), anyInt()))
-                .thenReturn(Mono.empty());
+        ClienteModel cliente = new ClienteModel(1, 0, 0);
+        TransacaoRequest request = new TransacaoRequest(1, "d", "desc");
+
+        BDDMockito.when(clienteRepository.buscaClientePorIdLockUpdate(anyInt()))
+                .thenReturn(Mono.just(cliente));
 
         webTestClient.post()
                 .uri("/clientes/{id}/transacoes", 1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(criarTransacaoModel()))
+                .body(BodyInserters.fromValue(request))
                 .exchange()
                 .expectStatus().is4xxClientError();
     }
@@ -201,7 +207,7 @@ class CrebitControllerIT {
     @SuppressWarnings("null")
     void testaGerarExtratoQuandoClienteNaoExisteIT() {
 
-        BDDMockito.when(clienteRepository.buscaClientePorId(anyInt()))
+        BDDMockito.when(clienteRepository.buscaClientePorIdLockUpdate(anyInt()))
                 .thenReturn(Mono.empty());
 
         webTestClient.post()

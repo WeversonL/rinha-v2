@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.util.Objects;
 
+import br.com.widsl.rinhav2.domain.TransacaoRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,9 @@ class CrebitServiceTest {
         BDDMockito.when(clienteRepository.buscaClientePorId(anyInt()))
                 .thenReturn(Mono.just(cliente));
 
+        BDDMockito.when(clienteRepository.buscaClientePorIdLockUpdate(anyInt()))
+                .thenReturn(Mono.just(cliente));
+
         BDDMockito.when(clienteRepository.atualizaSaldoCliente(anyInt(), anyInt()))
                 .thenReturn(Mono.just(cliente));
 
@@ -75,6 +79,9 @@ class CrebitServiceTest {
         BDDMockito.when(clienteRepository.buscaClientePorId(anyInt()))
                 .thenReturn(Mono.empty());
 
+        BDDMockito.when(clienteRepository.buscaClientePorIdLockUpdate(anyInt()))
+                .thenReturn(Mono.empty());
+
         StepVerifier.create(crebitService.gerarTransacao(1, criarTransacaoRequest()))
                 .expectSubscription()
                 .expectError(ClienteNaoEncontrado.class)
@@ -84,10 +91,13 @@ class CrebitServiceTest {
     @Test
     void testaRealizarTransacaoComErroNoLimiteCliente() {
 
-        BDDMockito.when(clienteRepository.atualizaSaldoCliente(anyInt(), anyInt()))
-                .thenReturn(Mono.empty());
+        ClienteModel cliente = new ClienteModel(1, 0, 0);
+        TransacaoRequest request = new TransacaoRequest(1, "d", "desc");
 
-        StepVerifier.create(crebitService.gerarTransacao(1, criarTransacaoRequest()))
+        BDDMockito.when(clienteRepository.buscaClientePorIdLockUpdate(anyInt()))
+                .thenReturn(Mono.just(cliente));
+
+        StepVerifier.create(crebitService.gerarTransacao(1, request))
                 .expectSubscription()
                 .expectError(EntidadeNaoProcessada.class)
                 .verify();
