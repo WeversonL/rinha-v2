@@ -4,7 +4,6 @@ import static br.com.widsl.rinhav2.util.CrebitCreator.HORARIO;
 import static br.com.widsl.rinhav2.util.CrebitCreator.criarClienteModel;
 import static br.com.widsl.rinhav2.util.CrebitCreator.criarExtrato;
 import static br.com.widsl.rinhav2.util.CrebitCreator.criarTransacaoModel;
-import static br.com.widsl.rinhav2.util.CrebitCreator.criarTransacaoResponse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 
@@ -59,10 +58,10 @@ class CrebitControllerIT {
                 .thenReturn(Mono.just(cliente));
 
         BDDMockito.when(clienteRepository.atualizaSaldoCliente(anyInt(), anyInt()))
-                .thenReturn(Mono.just(cliente));
+                .thenReturn(Mono.empty());
 
         BDDMockito.when(transacaoRepository.save(any(TransacaoModel.class)))
-                .thenReturn(Mono.just(criarTransacaoModel()));
+                .thenReturn(Mono.empty());
 
         BDDMockito.when(transacaoRepository.buscaTransacao(anyInt()))
                 .thenReturn(Flux.just(criarTransacaoModel()));
@@ -72,6 +71,9 @@ class CrebitControllerIT {
     @Test
     @SuppressWarnings("null")
     void testaRealizarTransacaoComSucessoIT() {
+
+        TransacaoResponse response = new TransacaoResponse(1, 2);
+
         webTestClient.post()
                 .uri("/clientes/{id}/transacoes", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +81,7 @@ class CrebitControllerIT {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(TransacaoResponse.class)
-                .isEqualTo(criarTransacaoResponse());
+                .isEqualTo(response);
     }
 
     @Test

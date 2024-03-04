@@ -9,8 +9,8 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface ClienteRepository extends R2dbcRepository<ClienteModel, Integer> {
-    @Query("UPDATE clientes SET saldo = :valor WHERE id = :id RETURNING *")
-    Mono<ClienteModel> atualizaSaldoCliente(final Integer id, Integer valor);
+    @Query("UPDATE clientes SET saldo = :valor WHERE id = :id")
+    Mono<Void> atualizaSaldoCliente(final Integer id, Integer valor);
 
     @Query("SELECT id, limite, saldo FROM clientes WHERE id = :id FOR UPDATE")
     Mono<ClienteModel> buscaClientePorIdLockUpdate(final Integer id);

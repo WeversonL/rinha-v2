@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import br.com.widsl.rinhav2.domain.TransacaoRequest;
+import br.com.widsl.rinhav2.domain.TransacaoResponse;
 import br.com.widsl.rinhav2.exception.impl.ClienteNaoEncontrado;
 import br.com.widsl.rinhav2.exception.impl.EntidadeNaoProcessada;
 import br.com.widsl.rinhav2.model.ClienteModel;
@@ -25,7 +26,6 @@ import br.com.widsl.rinhav2.model.TransacaoModel;
 import br.com.widsl.rinhav2.repository.ClienteRepository;
 import br.com.widsl.rinhav2.repository.TransacaoRepository;
 import br.com.widsl.rinhav2.service.impl.CrebitServiceImpl;
-import br.com.widsl.rinhav2.util.CrebitCreator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -56,10 +56,10 @@ class CrebitServiceTest {
                 .thenReturn(Mono.just(cliente));
 
         BDDMockito.when(clienteRepository.atualizaSaldoCliente(anyInt(), anyInt()))
-                .thenReturn(Mono.just(cliente));
+                .thenReturn(Mono.empty());
 
         BDDMockito.when(transacaoRepository.save(any(TransacaoModel.class)))
-                .thenReturn(Mono.just(transacao));
+                .thenReturn(Mono.empty());
 
         BDDMockito.when(transacaoRepository.buscaTransacao(anyInt()))
                 .thenReturn(Flux.just(transacao));
@@ -73,9 +73,12 @@ class CrebitServiceTest {
 
     @Test
     void testaRealizarTransacaoComSucesso() {
+
+        TransacaoResponse response = new TransacaoResponse(1, 2);
+
         StepVerifier.create(crebitService.gerarTransacao(1, criarTransacaoRequest()))
                 .expectSubscription()
-                .expectNext(CrebitCreator.criarTransacaoResponse())
+                .expectNext(response)
                 .verifyComplete();
     }
 

@@ -38,7 +38,7 @@ public class CrebitServiceImpl implements CrebitService {
 
         return this.clienteRepository.buscaClientePorIdLockUpdate(id)
                 .flatMap(cliente -> this.persisteSaldoCliente(id, valor, cliente)
-                        .flatMap(clienteAtualizado -> this.persisteTransacao(id, request, clienteAtualizado)))
+                        .then(this.persisteTransacao(id, request, cliente.limite(), (cliente.saldo() + valor))))
                 .switchIfEmpty(Mono.error(new ClienteNaoEncontrado("Cliente não encontrado")));
     }
 
@@ -50,14 +50,14 @@ public class CrebitServiceImpl implements CrebitService {
     }
 
     private Mono<TransacaoResponse> persisteTransacao(final Integer id, final TransacaoRequest request,
-            final ClienteModel cliente) {
+            final Integer limite, final Integer saldo) {
         return this.transacaoRepository.save(
                 new TransacaoModel(id, request.valor(), null, request.descricao(),
                         request.tipo()))
-                .thenReturn(new TransacaoResponse(cliente.limite(), cliente.saldo()));
+                .thenReturn(new TransacaoResponse(limite, saldo));
     }
 
-    private Mono<ClienteModel> persisteSaldoCliente(final Integer id, final Integer valor, final ClienteModel cliente) {
+    private Mono<Void> persisteSaldoCliente(final Integer id, final Integer valor, final ClienteModel cliente) {
         if (cliente.saldo() + valor < -cliente.limite())
             return Mono.error(new EntidadeNaoProcessada("Entidade não processada"));
         return clienteRepository.atualizaSaldoCliente(id, (cliente.saldo() + valor));
