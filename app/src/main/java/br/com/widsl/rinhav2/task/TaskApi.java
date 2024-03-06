@@ -42,27 +42,33 @@ public class TaskApi implements ApplicationRunner {
         String postURI = "http://localhost:%s/clientes/1/transacoes".formatted(serverPort);
         String getURI = "http://localhost:%s/clientes/1/extrato".formatted(serverPort);
 
-        this.webClient.post()
-                .uri(postURI)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(transacaoCredito))
-                .retrieve()
-                .bodyToMono(TransacaoResponse.class)
-                .block();
+        for (int i = 0; i < 25; i++) {
+            this.webClient.post()
+                    .uri(postURI)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromValue(transacaoCredito))
+                    .retrieve()
+                    .bodyToMono(TransacaoResponse.class)
+                    .block();
+        }
 
-        this.webClient.post()
-                .uri(postURI)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(transacaoDebito))
-                .retrieve()
-                .bodyToMono(TransacaoResponse.class)
-                .block();
+        for (int i = 0; i < 25; i++) {
+            this.webClient.post()
+                    .uri(postURI)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromValue(transacaoDebito))
+                    .retrieve()
+                    .bodyToMono(TransacaoResponse.class)
+                    .block();
+        }
 
-        this.webClient.get()
-                .uri(getURI)
-                .retrieve()
-                .bodyToMono(Extrato.class)
-                .block();
+        for (int i = 0; i < 50; i++) {
+            this.webClient.get()
+                    .uri(getURI)
+                    .retrieve()
+                    .bodyToMono(Extrato.class)
+                    .block();
+        }
 
         this.crebitService
                 .removerTransacao(1)
