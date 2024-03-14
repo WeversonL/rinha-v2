@@ -2,8 +2,7 @@
 FROM ghcr.io/graalvm/native-image-community:21 AS build
 WORKDIR /app
 COPY ./app /app
-RUN DB_PASS="$DB_PASS" DB_URL="$DB_URL" DB_USER="$DB_USER" \
-    ./mvnw -Pnative native:compile
+RUN DB_URL=r2dbc:postgresql://localhost:5432/rinhadb DB_USER=rinha DB_PASS=rinha ./mvnw -Pnative native:compile
 
 # EXECUTE API
 FROM alpine:3.19.1
